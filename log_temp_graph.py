@@ -6,18 +6,16 @@ import os
 from serial.tools import list_ports
 
 # --- 設定項目 ---
-# SERIAL_PORT = 'COM3'
 BAUD_RATE = 115200
 OUTPUT_DIR = './logs'
 # ----------------
 
 def find_arduino_port():
-    """Arduinoが接続されているCOMポートを自動的に検索して返す"""
+    """Arduino公式・互換ボードを自動的に検索して返す"""
     ports = list_ports.comports()
     for port in ports:
-        # Arduino Unoや互換機の多くは説明に'Arduino'または'CH340'が含まれる
-        if 'Arduino' in port.description or 'CH340' in port.description:
-            print(f"Arduinoを発見しました: {port.device}")
+        if 'VID:PID=2341' in port.hwid or 'CH340' in port.description:
+            print(f"Arduinoまたは互換デバイスを発見しました: {port.device}")
             return port.device
     return None
 
@@ -28,11 +26,9 @@ if not SERIAL_PORT:
     print("エラー: Arduinoが見つかりませんでした。接続を確認してください。")
     exit()
 
-# ログディレクトリが存在しない場合は作成
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
-# タイムスタンプ付きのファイル名を生成
 timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
 OUTPUT_FILE = os.path.join(OUTPUT_DIR, f"temperature_log_{timestamp}.dat")
 
@@ -40,21 +36,29 @@ print(f"データ記録およびグラフ表示プログラムを開始します
 print(f"ポート: {SERIAL_PORT}, ログファイル: {OUTPUT_FILE}")
 print("終了するにはグラフウィンドウを閉じるか Ctrl + C を押してください。")
 
-# データの保存リスト
 timestamps = []
 temperatures = []
 start_time = time.time()
 
-# グラフの初期設定
+# --- グラフの初期設定 ---
 plt.ion()
 fig, ax = plt.subplots()
-line, = ax.plot(timestamps, temperatures)
-ax.set_xlabel("Time [s]")
-ax.set_ylabel("Temperature [C]")
-# ax.set_title("リアルタイム温度変化")
+line, = ax.plot(timestamps, temperatures, 'r-') 
+
+ax.set_ylim(20, 30)
+
+ax.set_xlabel("Time (s)")
+ax.set_ylabel("Temperature (°C)")
+ax.grid(True)
+
+temp_text = ax.text(0.95, 0.95, '', transform=ax.transAxes,
+                    fontsize=12, color='black',
+                    ha='right', va='top',
+                    bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.7))
+
 
 try:
-    ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=10)
+    ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
         f.write("Relative Time(s),Temperature(C)\n")
 
@@ -67,14 +71,18 @@ try:
                         relative_time = time.time() - start_time
                         timestamps.append(relative_time)
                         temperatures.append(temperature)
-                        log_entry = f"{relative_time:.2f},{temperature:.2f}\n"
+                        log_entry = f"{int(relative_time)},{temperature:.2f}\n"
                         f.write(log_entry)
                         f.flush()
 
                         line.set_xdata(timestamps)
                         line.set_ydata(temperatures)
+
                         ax.relim()
-                        ax.autoscale_view()
+                        ax.autoscale_view(scalex=True, scaley=False) # X軸のみ自動調整
+
+                        temp_text.set_text(f'Recentry: {temperature:.2f} ℃')
+
                         fig.canvas.draw()
                         fig.canvas.flush_events()
 
@@ -93,6 +101,6 @@ except serial.SerialException as e:
     print(e)
 finally:
     plt.ioff()
-    plt.show()
+    print("プログラムを終了しました。")
     if 'ser' in locals() and ser.is_open:
         ser.close()

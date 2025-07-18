@@ -42,13 +42,13 @@ void setup() {
 
 void loop() {
   float temp = getTemp();
-  
+
   // 温度が正しく読み取れた場合のみ、数値を送信
   if (temp != -1000.0) {
     // パソコン側で処理しやすいように、数値だけを送ります
     Serial.println(temp);
   }
-  
+
   // 5秒ごとに測定（記録間隔はここで調整）
-  delay(5000); 
+  delay(1000);
 }
