@@ -4,7 +4,7 @@
 冷却塔の冷却性能を循環する水の温度変化を記録することで評価する
 
 1. 温度計測装置 
-    - 水槽用に作った温度計を流用 [SwitchScience_DS18B20](https://ssci.to/4908)
+    - 水槽に作った温度計を流用 [SwitchScience_DS18B20](https://ssci.to/4908)
     - Arduino Uno
 
 2. 温度計計測プログラム
