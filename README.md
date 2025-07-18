@@ -4,3 +4,4 @@
 作った冷却塔の冷却性能を循環する水の温度変化を見ることで評価する
 
 水槽用に作った温度計を流用する
+https://www.switch-science.com/products/4908?srsltid=AfmBOormfzKi91AanDKoccM3xtwwNVBler4wqWNjpYNFEaYrrHQLLUIu
