@@ -60,7 +60,7 @@ temp_text = ax.text(0.95, 0.95, '', transform=ax.transAxes,
 try:
     ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
     with open(OUTPUT_FILE, 'w', encoding='utf-8') as f:
-        f.write("Relative Time(s),Temperature(C)\n")
+        f.write("# Relative Time(s) Temperature(C)\n")
 
         while plt.fignum_exists(fig.number):
             try:
@@ -71,7 +71,7 @@ try:
                         relative_time = time.time() - start_time
                         timestamps.append(relative_time)
                         temperatures.append(temperature)
-                        log_entry = f"{int(relative_time)},{temperature:.2f}\n"
+                        log_entry = f"{int(relative_time)} {temperature:.2f}\n"
                         f.write(log_entry)
                         f.flush()
 
@@ -79,7 +79,7 @@ try:
                         line.set_ydata(temperatures)
 
                         ax.relim()
-                        ax.autoscale_view(scalex=True, scaley=False) # X軸のみ自動調整
+                        ax.autoscale_view(scalex=True, scaley=False)
 
                         temp_text.set_text(f'Recentry: {temperature:.2f} ℃')
 
